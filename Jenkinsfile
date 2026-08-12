@@ -24,11 +24,9 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                bat '''
-                docker stop hello-jenkins-demo-container 2>nul || exit 0
-                docker rm hello-jenkins-demo-container 2>nul || exit 0
-                docker run -d --name hello-jenkins-demo-container hello-jenkins-demo:latest
-                '''
+                bat 'docker stop hello-jenkins-demo-container || ver>nul'
+                bat 'docker rm hello-jenkins-demo-container || ver>nul'
+                bat 'docker run -d --name hello-jenkins-demo-container hello-jenkins-demo:latest'
             }
         }
     }
