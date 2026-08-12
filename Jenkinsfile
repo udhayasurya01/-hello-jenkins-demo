@@ -17,16 +17,21 @@ pipeline {
                 bat 'mvn clean package'
             }
         }
-        stage('Run') {
+        stage('Docker Build') {
             steps {
-                bat 'java -jar target/hello-jenkins-demo.jar'
+                bat 'docker build -t hello-jenkins-demo:latest .'
+            }
+        }
+        stage('Docker Run') {
+            steps {
+                bat 'docker run --rm hello-jenkins-demo:latest'
             }
         }
     }
 
     post {
         success {
-            echo 'Build success!'
+            echo 'Build & Docker image success!'
         }
         failure {
             echo 'Build failed — Console Output.'
