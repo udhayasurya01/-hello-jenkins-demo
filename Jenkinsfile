@@ -29,7 +29,7 @@ pipeline {
             echo 'Build success!'
         }
         failure {
-            echo 'Build failed — Console Output பாருங்க.'
+            echo 'Build failed — Console Output.'
         }
     }
 }
