@@ -22,19 +22,23 @@ pipeline {
                 bat 'docker build -t hello-jenkins-demo:latest .'
             }
         }
-        stage('Docker Run') {
+        stage('Deploy') {
             steps {
-                bat 'docker run --rm hello-jenkins-demo:latest'
+                bat '''
+                docker stop hello-jenkins-demo-container 2>nul || exit 0
+                docker rm hello-jenkins-demo-container 2>nul || exit 0
+                docker run -d --name hello-jenkins-demo-container hello-jenkins-demo:latest
+                '''
             }
         }
     }
 
     post {
         success {
-            echo 'Build & Docker image success!'
+            echo 'Deploy success!'
         }
         failure {
-            echo 'Build failed — Console Output.'
+            echo 'Build/Deploy failed — Console Output.'
         }
     }
 }
