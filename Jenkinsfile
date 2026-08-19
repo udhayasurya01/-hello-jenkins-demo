@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     triggers {
-        pollSCM('H/5 * * * *')
+        githubPush()
     }
 
     tools {
@@ -30,11 +30,41 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Save Docker Image') {
             steps {
-                bat 'docker stop hello-jenkins-demo-container || ver>nul'
-                bat 'docker rm hello-jenkins-demo-container || ver>nul'
-                bat 'docker run -d --name hello-jenkins-demo-container hello-jenkins-demo:latest'
+                bat 'docker save -o hello-jenkins-demo.tar hello-jenkins-demo:latest'
+            }
+        }
+
+        stage('Transfer Image to Server') {
+            steps {
+                sshPublisher(publishers: [
+                    sshPublisherDesc(
+                        configName: 'office-server',
+                        transfers: [
+                            sshTransfer(
+                                sourceFiles: 'hello-jenkins-demo.tar',
+                                remoteDirectory: '.',
+                                execCommand: 'sudo k3s ctr images import /home/mani/hello-jenkins-demo.tar'
+                            )
+                        ]
+                    )
+                ])
+            }
+        }
+
+        stage('Deploy to K8s') {
+            steps {
+                sshPublisher(publishers: [
+                    sshPublisherDesc(
+                        configName: 'office-server',
+                        transfers: [
+                            sshTransfer(
+                                execCommand: 'sudo k3s kubectl apply -f /home/mani/deployment.yaml'
+                            )
+                        ]
+                    )
+                ])
             }
         }
     }
